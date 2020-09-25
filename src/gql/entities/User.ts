@@ -14,4 +14,6 @@ export class User {
 
 	@Field(() => [Post], { name: 'posts' })
 	postIDs: string[]
+
+	password: string
 }

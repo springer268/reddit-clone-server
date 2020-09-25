@@ -1,3 +1,7 @@
-import { TestDatabaseWrapper } from './TestDatabaseWrapper'
+import * as Wrappers from './wrappers'
 
-export class DB extends TestDatabaseWrapper {}
+/**
+ * The current Database Wrapper.
+ * Should be Database and Implementation agnostic
+ */
+export const DB = new Wrappers.TestDatabaseWrapper()

@@ -1,4 +1,4 @@
-import { Arg, FieldResolver, Query, Resolver, Root } from 'type-graphql'
+import { Arg, FieldResolver, Mutation, Query, Resolver, Root } from 'type-graphql'
 import { User, Post } from '../entities'
 import { DB } from '../../db'
 
@@ -17,5 +17,13 @@ export class UserResolver {
 	@FieldResolver(() => [Post])
 	async posts(@Root() user: User): Promise<Post[]> {
 		return await DB.getPostsByUserID(user.id)
+	}
+
+	@Mutation(() => Boolean)
+	async addUserByUsernameAndPassword(
+		@Arg('username') username: string,
+		@Arg('password') password: string
+	): Promise<boolean> {
+		return DB.addUserByUsernameAndPassword(username, password)
 	}
 }
