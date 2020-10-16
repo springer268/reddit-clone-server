@@ -1,28 +1,22 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server'
 import { buildSchema } from 'type-graphql'
-import * as resolvers from './gql/resolvers'
+import { resolvers } from './entities/resolvers'
 
-/**
- * Entry point of the Application.
- *
- * Takes in the resolvers and runs the GraphQL server.
- *
- * @param resolvers The resolvers to build the schema with.
- */
-const app = async (resolvers: { [k: string]: Function }) => {
-	type ResolversType = Parameters<typeof buildSchema>[0]['resolvers']
-
+const initialize = async () => {
 	const schema = await buildSchema({
-		resolvers: Object.values(resolvers) as ResolversType,
+		resolvers,
 		validate: false
 	})
 
 	const apolloServer = new ApolloServer({
-		schema
+		schema,
+		cors: true
 	})
 
-	apolloServer.listen(process.env.PORT ?? 5000).then(info => console.log(`Started GraphQL server: ${info.url}`))
+	apolloServer.listen(process.env.PORT ?? 4000).then(info => console.log(`Started GraphQL server: ${info.url}`))
 }
 
-app(resolvers)
+initialize().catch(error => {
+	console.log(error)
+})
