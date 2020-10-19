@@ -3,23 +3,23 @@ import { User, Post } from '..'
 
 @Resolver(User)
 export class UserResolver {
-	@Query(() => User, { nullable: true })
-	getUserByID(@Arg('id') id: string) {
-		return User.getByID(id)
-	}
-
-	@Query(() => User, { nullable: true })
-	GetUserByUsername(@Arg('username') username: string) {
-		return User.getByUsername(username)
-	}
-
 	@FieldResolver(() => [Post])
-	posts(@Root() user: User) {
-		return Post.getAllByUserID(user.id)
+	async posts(@Root() user: User) {
+		return await Post.getAllByUserID(user.id)
 	}
 
-	@Mutation(() => Boolean)
-	addUserByUsernameAndPassword(@Arg('username') username: string, @Arg('password') password: string) {
-		return User.addByUsernameAndPassword(username, password)
+	@Query(() => User, { nullable: true })
+	async getUserByID(@Arg('id') id: string) {
+		return await User.getByID(id)
+	}
+
+	@Query(() => User, { nullable: true })
+	async GetUserByName(@Arg('name') name: string) {
+		return await User.getByName(name)
+	}
+
+	@Mutation(() => User)
+	async AddUser(@Arg('name') name: string, @Arg('password') password: string): Promise<User> {
+		return await User.persist({ name, password })
 	}
 }

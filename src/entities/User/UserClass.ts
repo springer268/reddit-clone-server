@@ -1,75 +1,48 @@
-import { Field, ObjectType, ID, Query } from 'type-graphql'
+import { BaseEntity, Entity, Column, PrimaryColumn } from 'typeorm'
+import { Field, ObjectType, ID } from 'type-graphql'
 import { generateUUID } from '../../util/generateUUID'
-import { Post } from '..'
 
+@Entity()
 @ObjectType()
-export class User {
+export class User extends BaseEntity {
+	@PrimaryColumn()
 	@Field(() => ID)
 	id: string
 
+	@Column()
 	@Field(() => String)
 	name: string
 
+	@Column()
 	@Field(() => String)
 	email: string
 
-	password: string
-
+	@Column()
 	@Field(() => String)
 	description: string
 
-	@Query(() => [Post], { name: 'posts' })
-	async getPosts(): Promise<Post[]> {
-		return await Post.getAllByUserID(this.id)
+	@Column()
+	password: string
+
+	static async persist(partial: Partial<User>): Promise<User> {
+		return await User.save(User.create({ ...new User(partial) }))
 	}
 
-	protected static createTestData(...entries: Partial<User>[]): User[] {
-		return entries.map(entry => new User(entry))
+	static async getByName(name: User['name']): Promise<User | null> {
+		return (await User.findOne({ where: `name='${name}'` })) ?? null
 	}
 
-	protected static testData = User.createTestData(
-		{ name: 'nick', id: '1' },
-		{ name: 'michael' },
-		{ name: 'wyatt' },
-		{ name: 'zach' }
-	)
-
-	static fromUsernameAndPassword(username: User['name'], password: User['password']): User {
-		return new User({ name: username, password })
-	}
-
-	static getByUsername(username: User['name']): Promise<User | null> {
-		return new Promise<User | null>(resolve => resolve(this.testData.find(user => user.name === username) ?? null))
-	}
-
-	static getByID(id: User['id']): Promise<User | null> {
-		return new Promise<User | null>(resolve => resolve(this.testData.find(user => user.id === id) ?? null))
-	}
-
-	static add(user: User): Promise<boolean> {
-		user
-		throw 'RIP'
-	}
-
-	static addByUsernameAndPassword(username: User['name'], password: User['password']): Promise<boolean> {
-		username
-		password
-		throw 'RIP'
+	static async getByID(id: User['id']): Promise<User | null> {
+		return (await User.findOne({ where: `name='${id}'` })) ?? null
 	}
 
 	public constructor(partial?: Partial<User>) {
-		const initial: Omit<User, 'getPosts'> = {
-			name: 'noone',
-			email: 'noone@gmail.com',
-			description: 'Hello! I am noone.',
-			id: generateUUID(),
-			password: 'password123'
-		}
+		super()
 
-		const props = { ...initial, ...partial } as User
-
-		Object.entries(props).forEach(([k, v]) => {
-			this[k as keyof this] = v
-		})
+		this.name = partial?.name ?? 'testName'
+		this.id = partial?.id ?? generateUUID()
+		this.description = partial?.description ?? `Hello, I am ${this.name}!`
+		this.email = partial?.email ?? `${this.name.toLowerCase()}@gmail.com`
+		this.password = partial?.password ?? `${this.name}123`
 	}
 }

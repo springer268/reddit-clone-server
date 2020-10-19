@@ -1,31 +1,42 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { BaseEntity, Entity, PrimaryColumn, Column } from 'typeorm'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
+import { generateUUID } from './../../util/generateUUID'
 
 @Entity()
 @ObjectType()
-export class Community {
-	protected static testData: Community[] = [new Community({ name: 'meirl' })]
-
-	@PrimaryKey()
+export class Community extends BaseEntity {
+	@PrimaryColumn()
 	@Field(() => ID)
 	id: string
 
-	@Property()
+	@Column()
 	@Field(() => String)
 	name: string
 
-	@Property()
+	@Column()
 	@Field(() => Int)
 	followerCount: number
 
-	public constructor(partial: Partial<Community>) {
-		this.id = '0'
-		this.name = 'untitledcommunity'
-		this.followerCount = 0
+	static async persist(partial: Partial<Community>): Promise<Community> {
+		const community = Community.create({ ...new Community(partial) })
+		return await Community.save(community)
+	}
 
-		partial &&
-			Object.entries(partial as Community).forEach(([K, V]) => {
-				this[K as keyof this] = V
-			})
+	static async getByID(id: Community['id']): Promise<Community | null> {
+		const result = (await Community.findOne({ where: `id='${id}'` })) ?? null
+		return result
+	}
+
+	static async getByName(name: Community['name']): Promise<Community | null> {
+		const result = (await Community.findOne({ where: `name='${name}'` })) ?? null
+		return result
+	}
+
+	public constructor(partial?: Partial<Community>) {
+		super()
+
+		this.id = partial?.id ?? generateUUID()
+		this.name = partial?.name ?? 'testCommunity'
+		this.followerCount = partial?.followerCount ?? 0
 	}
 }

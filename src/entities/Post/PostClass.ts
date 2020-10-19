@@ -1,21 +1,16 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm'
+import { BaseEntity, Entity, Column, PrimaryColumn } from 'typeorm'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 import { generateUUID } from '../../util/generateUUID'
 import { User, Community } from '..'
 
 @Entity()
 @ObjectType()
-export class Post {
-	protected static testData: Post[] = [
-		new Post({ id: '1', title: 'LOL', authorID: '1' }),
-		new Post({ id: '2', title: 'HEHE', authorID: '1' })
-	]
-
+export class Post extends BaseEntity {
 	@PrimaryColumn()
 	@Field(() => ID)
 	id: string
 
-	@Column()
+	@Column({ type: 'text' })
 	@Field(() => User, { name: 'author' })
 	authorID: User['id']
 
@@ -24,27 +19,47 @@ export class Post {
 	title: string
 
 	@Column()
+	@Field(() => String)
+	content: string
+
+	@Column({ type: 'text' })
 	@Field(() => Community, { name: 'community' })
 	communityID: Community['id']
 
-	@Column()
+	@Column({ type: 'int' })
 	@Field(() => Int)
 	upvotes: number
 
-	@Column()
+	@Column({ type: 'int' })
 	@Field(() => Int)
 	downvotes: number
 
+	static async persist(partial: Partial<Post>): Promise<Post> {
+		return await Post.save(Post.create({ ...new Post(partial) }))
+	}
+
+	static async getByID(id: Post['id']): Promise<Post | null> {
+		return (await Post.findOne({ where: `id='${id}'` })) ?? null
+	}
+
 	static async getAllByUserID(id: User['id']): Promise<Post[]> {
-		const result = this.testData.filter(post => post.authorID === id)
-		return result
+		return await Post.find({ where: `Post.authorID='${id}'` })
+	}
+
+	static async deleteByID(id: User['id']): Promise<boolean> {
+		await Post.delete(id)
+		return true
 	}
 
 	public constructor(partial?: Partial<Post>) {
+		super()
+
 		this.title = partial?.title ?? 'Default Title'
+		this.content = partial?.content ?? 'No body.'
 		this.id = partial?.id ?? generateUUID()
-		this.upvotes = partial?.upvotes ?? 0
+		this.upvotes = partial?.upvotes ?? Math.floor(Math.random() * Math.pow(10, 5))
 		this.downvotes = partial?.downvotes ?? 0
-		this.authorID = partial?.authorID ?? '0'
+		this.authorID = partial?.authorID ?? '1'
+		this.communityID = partial?.communityID ?? '1'
 	}
 }
