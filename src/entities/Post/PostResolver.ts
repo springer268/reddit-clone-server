@@ -10,7 +10,8 @@ export class PostResolver {
 
 	@FieldResolver(() => User)
 	async author(@Root() post: Post) {
-		return await User.getByID(post.authorID)
+		const result = await User.getByID(post.authorID)
+		return result
 	}
 
 	@Query(() => Post, { nullable: true })

@@ -33,7 +33,7 @@ export class User extends BaseEntity {
 	}
 
 	static async getByID(id: User['id']): Promise<User | null> {
-		return (await User.findOne({ where: `name='${id}'` })) ?? null
+		return (await User.findOne({ where: `id='${id}'` })) ?? null
 	}
 
 	public constructor(partial?: Partial<User>) {

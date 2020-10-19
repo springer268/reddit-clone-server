@@ -23,13 +23,11 @@ export class Community extends BaseEntity {
 	}
 
 	static async getByID(id: Community['id']): Promise<Community | null> {
-		const result = (await Community.findOne({ where: `id='${id}'` })) ?? null
-		return result
+		return (await Community.findOne({ where: `id='${id}'` })) ?? null
 	}
 
 	static async getByName(name: Community['name']): Promise<Community | null> {
-		const result = (await Community.findOne({ where: `name='${name}'` })) ?? null
-		return result
+		return (await Community.findOne({ where: `name='${name}'` })) ?? null
 	}
 
 	public constructor(partial?: Partial<Community>) {
