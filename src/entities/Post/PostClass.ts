@@ -39,11 +39,11 @@ export class Post extends BaseEntity {
 	}
 
 	static async getByID(id: Post['id']): Promise<Post | null> {
-		return (await Post.findOne({ where: `id='${id}'` })) ?? null
+		return (await Post.findOne({ where: { id } })) ?? null
 	}
 
 	static async getAllByUserID(id: User['id']): Promise<Post[]> {
-		return await Post.find({ where: `Post.authorID='${id}'` })
+		return await Post.find({ where: { authorID: id } })
 	}
 
 	static async deleteByID(id: User['id']): Promise<boolean> {

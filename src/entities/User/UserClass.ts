@@ -29,11 +29,11 @@ export class User extends BaseEntity {
 	}
 
 	static async getByName(name: User['name']): Promise<User | null> {
-		return (await User.findOne({ where: `name='${name}'` })) ?? null
+		return (await User.findOne({ where: { name } })) ?? null
 	}
 
 	static async getByID(id: User['id']): Promise<User | null> {
-		return (await User.findOne({ where: `id='${id}'` })) ?? null
+		return (await User.findOne({ where: { id } })) ?? null
 	}
 
 	public constructor(partial?: Partial<User>) {

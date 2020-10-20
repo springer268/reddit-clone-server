@@ -1,6 +1,9 @@
 import 'reflect-metadata'
+import express from 'express'
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { createConnection } from 'typeorm'
-import { ApolloServer } from 'apollo-server'
+import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { resolvers } from './entities/resolvers'
 import { Community, Post, User } from './entities'
@@ -18,17 +21,23 @@ const initialize = async () => {
 		entities: [Community, Post, User]
 	})
 
-	const schema = await buildSchema({
-		resolvers,
-		validate: false
-	})
+	const app = express()
+
+	app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+	app.use(cookieParser())
+
+	const schema = await buildSchema({ resolvers })
 
 	const apolloServer = new ApolloServer({
 		schema,
-		cors: true
+		context: ({ req, res }) => ({ req, res })
 	})
 
-	apolloServer.listen(process.env.PORT ?? 4000).then(info => console.log(`Started GraphQL server: ${info.url}`))
+	apolloServer.applyMiddleware({ app, cors: false })
+
+	app.listen(4000, () => {
+		console.log('Listening on http://localhost:4000/graphql')
+	})
 }
 
 initialize().catch(error => console.log(error))
