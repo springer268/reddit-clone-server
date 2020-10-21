@@ -13,6 +13,7 @@
 		"@mikro-orm/postgresql": "^4.0.7",
 		"apollo-server": "^2.18.1",
 		"apollo-server-express": "^2.18.2",
+		"bcrypt": "^5.0.0",
 		"class-validator": "^0.12.2",
 		"cookie-parser": "^1.4.5",
 		"cors": "^2.8.5",
@@ -26,6 +27,7 @@
 		"typeorm": "^0.2.28"
 	},
 	"devDependencies": {
+		"@types/bcrypt": "^3.0.0",
 		"@types/cookie-parser": "^1.4.2",
 		"@types/express-jwt": "^0.0.42",
 		"@types/jsonwebtoken": "^8.5.0",

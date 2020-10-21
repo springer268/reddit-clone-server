@@ -1,4 +1,5 @@
 import { BaseEntity, Entity, Column, PrimaryColumn } from 'typeorm'
+import { Length } from 'class-validator'
 import { Field, ObjectType, ID } from 'type-graphql'
 import { generateUUID } from '../../util/generateUUID'
 
@@ -22,6 +23,7 @@ export class User extends BaseEntity {
 	description: string
 
 	@Column()
+	@Length(8)
 	password: string
 
 	static async persist(partial: Partial<User>): Promise<User> {

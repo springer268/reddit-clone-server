@@ -1,5 +1,5 @@
 import { Arg, Query, Resolver, Mutation } from 'type-graphql'
-import { Community } from '../../entities'
+import { Community, Post } from '../../entities'
 
 @Resolver(Community)
 export class CommunityResolver {
@@ -11,6 +11,14 @@ export class CommunityResolver {
 	@Query(() => Community, { nullable: true })
 	async GetCommunityByName(@Arg('name') name: string): Promise<Community | null> {
 		return await Community.getByName(name)
+	}
+
+	@Query(() => [Post], { nullable: true })
+	async GetPostsFromCommunityByID(@Arg('communityID') communityID: string) {
+		const community = await Community.getByID(communityID)
+		if (!community) return null
+		const posts = await Post.find({ where: { communityID } })
+		return posts
 	}
 
 	@Mutation(() => Community)
