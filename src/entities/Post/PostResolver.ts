@@ -22,13 +22,12 @@ export class PostResolver {
 
 	@Mutation(() => Post)
 	async AddPost(
-		@Ctx() { req }: Context,
+		@Ctx() _ctx: Context,
 		@Arg('title') title: string,
 		@Arg('content') content: string,
 		@Arg('authorID') authorID: string,
 		@Arg('communityID') communityID: string
 	) {
-		console.log(req)
 		return await Post.persist({ title, content, authorID, communityID })
 	}
 

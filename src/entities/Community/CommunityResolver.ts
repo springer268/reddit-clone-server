@@ -13,6 +13,11 @@ export class CommunityResolver {
 		return await Community.getByName(name)
 	}
 
+	@Query(() => [Community])
+	async GetCommunities(): Promise<Community[]> {
+		return await Community.find()
+	}
+
 	@Query(() => [Post], { nullable: true })
 	async GetPostsFromCommunityByID(@Arg('communityID') communityID: string) {
 		const community = await Community.getByID(communityID)
