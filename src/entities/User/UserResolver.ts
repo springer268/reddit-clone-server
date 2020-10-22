@@ -12,7 +12,7 @@ export class UserResolver {
 	}
 
 	@Query(() => User, { nullable: true })
-	async GetSelf(@Ctx() { req }: Context, @Arg('yeah') _yeah: string) {
+	async GetSelf(@Ctx() { req }: Context) {
 		if (!req.headers.cookie) return null
 
 		const data = decode(req.cookies['refresh-token']) as { userID: string }
