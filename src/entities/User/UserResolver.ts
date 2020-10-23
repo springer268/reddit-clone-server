@@ -7,12 +7,18 @@ import { sign, decode } from 'jsonwebtoken'
 @Resolver(User)
 export class UserResolver {
 	@FieldResolver(() => [Post])
-	async posts(@Root() user: User) {
-		return await Post.getAllByUserID(user.id)
+	async posts(@Root() user: User, @Arg('amount') amount: number, @Arg('offset') offset: number) {
+		return await Post.find({
+			where: { authorID: user.id },
+			take: amount,
+			skip: offset,
+			order: { upvotes: 'DESC' }
+		})
 	}
 
 	@Query(() => User, { nullable: true })
 	async GetSelf(@Ctx() { req }: Context) {
+		console.log('yep')
 		if (!req.headers.cookie) return null
 
 		const data = decode(req.cookies['refresh-token']) as { userID: string }
@@ -32,9 +38,8 @@ export class UserResolver {
 	}
 
 	@Query(() => User, { nullable: true })
-	async GetUserByName(@Ctx() { req }: Context, @Arg('name') name: string) {
+	async GetUserByNameWithTotalPosts(@Ctx() { req }: Context, @Arg('name') name: string) {
 		req
-
 		return await User.getByName(name)
 	}
 
