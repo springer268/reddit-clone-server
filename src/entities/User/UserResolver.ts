@@ -18,7 +18,6 @@ export class UserResolver {
 
 	@Query(() => User, { nullable: true })
 	async GetSelf(@Ctx() { req }: Context) {
-		console.log('yep')
 		if (!req.headers.cookie) return null
 
 		const data = decode(req.cookies['refresh-token']) as { userID: string }
@@ -65,7 +64,6 @@ export class UserResolver {
 
 		const hashedPassword = await bcrypt.hash(password, 10)
 
-		console.log(`New User: ${name}`)
 		return await User.persist({ name, password: hashedPassword })
 	}
 }
