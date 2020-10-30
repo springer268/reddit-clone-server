@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, PrimaryColumn } from 'typeorm'
+import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, DeepPartial } from 'typeorm'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 import { generateUUID } from '../../util/generateUUID'
 import { User, Community } from '..'
@@ -10,10 +10,6 @@ export class Post extends BaseEntity {
 	@Field(() => ID)
 	id: string
 
-	@Column({ type: 'text' })
-	@Field(() => User, { name: 'author' })
-	authorID: User['id']
-
 	@Column()
 	@Field(() => String)
 	title: string
@@ -21,10 +17,6 @@ export class Post extends BaseEntity {
 	@Column()
 	@Field(() => String)
 	content: string
-
-	@Column({ type: 'text' })
-	@Field(() => Community, { name: 'community' })
-	communityID: Community['id']
 
 	@Column({ type: 'int' })
 	@Field(() => Int)
@@ -34,28 +26,31 @@ export class Post extends BaseEntity {
 	@Field(() => Int)
 	downvotes: number
 
-	static async persist(partial: Partial<Post>): Promise<Post> {
-		return await Post.save(Post.create({ ...new Post(partial) }))
-	}
+	@ManyToOne(() => User, user => user.posts)
+	@JoinColumn({ name: 'authorID' })
+	author: User
+
+	@ManyToOne(() => Community, community => community.posts)
+	@JoinColumn({ name: 'communityID' })
+	community: Community
+
+	@Column()
+	authorID: string
+
+	@Column()
+	communityID: string
 
 	static async getByID(id: Post['id']): Promise<Post | null> {
-		return (await Post.findOne({ where: { id } })) ?? null
+		return (await Post.findOne({ id })) ?? null
 	}
 
-	static async deleteByID(id: User['id']): Promise<boolean> {
-		await Post.delete(id)
-		return true
-	}
+	static async persist(partial: DeepPartial<Post>): Promise<Post> {
+		const initial: Partial<Post> = {
+			upvotes: Math.trunc(Math.random() * Math.pow(10, 5)),
+			id: generateUUID(),
+			downvotes: 0
+		}
 
-	public constructor(partial?: Partial<Post>) {
-		super()
-
-		this.title = partial?.title ?? 'Default Title'
-		this.content = partial?.content ?? 'No body.'
-		this.id = partial?.id ?? generateUUID()
-		this.upvotes = partial?.upvotes ?? Math.floor(Math.random() * Math.pow(10, 5))
-		this.downvotes = partial?.downvotes ?? 0
-		this.authorID = partial?.authorID ?? '1'
-		this.communityID = partial?.communityID ?? '1'
+		return Post.create({ ...initial, ...partial }).save()
 	}
 }

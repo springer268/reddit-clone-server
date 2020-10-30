@@ -1,7 +1,7 @@
-import { BaseEntity, Entity, Column, PrimaryColumn } from 'typeorm'
-import { Length } from 'class-validator'
+import { BaseEntity, Entity, Column, PrimaryColumn, OneToMany, DeepPartial } from 'typeorm'
 import { Field, ObjectType, ID } from 'type-graphql'
 import { generateUUID } from '../../util/generateUUID'
+import { Post } from '..'
 
 @Entity()
 @ObjectType()
@@ -23,28 +23,26 @@ export class User extends BaseEntity {
 	description: string
 
 	@Column()
-	@Length(8)
 	password: string
 
-	static async persist(partial: Partial<User>): Promise<User> {
-		return await User.save(User.create({ ...new User(partial) }))
+	@OneToMany(() => Post, post => post.author)
+	posts: Post[]
+
+	static async getByID(id: User['id']): Promise<User | null> {
+		return (await User.findOne({ id })) ?? null
 	}
 
 	static async getByName(name: User['name']): Promise<User | null> {
-		return (await User.findOne({ where: { name } })) ?? null
+		return (await User.findOne({ name })) ?? null
 	}
 
-	static async getByID(id: User['id']): Promise<User | null> {
-		return (await User.findOne({ where: { id } })) ?? null
-	}
+	static async persist(partial: DeepPartial<User>): Promise<User> {
+		const initial: Partial<User> = {
+			id: generateUUID(),
+			description: '',
+			email: ''
+		}
 
-	public constructor(partial?: Partial<User>) {
-		super()
-
-		this.name = partial?.name ?? 'testName'
-		this.id = partial?.id ?? generateUUID()
-		this.description = partial?.description ?? `Hello, I am ${this.name}!`
-		this.email = partial?.email ?? `${this.name.toLowerCase()}@gmail.com`
-		this.password = partial?.password ?? `${this.name}123`
+		return User.create({ ...initial, ...partial }).save()
 	}
 }

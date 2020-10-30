@@ -1,3 +1,6 @@
-export * from './Post'
+export * from './Comment'
 export * from './Community'
+export * from './CommunityUser'
+export * from './Post'
+export * from './resolvers'
 export * from './User'

@@ -1,5 +1,5 @@
 import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root } from 'type-graphql'
-import { User, Post } from '..'
+import { User, Post, Comment, Community, CommunityUser } from '..'
 import { Context } from '../../Context'
 import bcrypt from 'bcrypt'
 import { sign, decode } from 'jsonwebtoken'
@@ -16,30 +16,57 @@ export class UserResolver {
 		})
 	}
 
+	@FieldResolver(() => [Comment])
+	async comments(
+		@Root() user: User,
+		@Arg('amount') amount: number,
+		@Arg('offset', { defaultValue: 0 }) offset: number
+	) {
+		return await Comment.find({
+			where: { authorID: user.id },
+			take: amount,
+			skip: offset,
+			order: { upvotes: 'DESC' }
+		})
+	}
+
+	@FieldResolver(() => [Community])
+	async comunities(
+		@Root() user: User,
+		@Arg('amount') amount: number,
+		@Arg('offset', { defaultValue: 0 }) offset: number
+	): Promise<Community[]> {
+		throw 'unimplemented'
+	}
+
 	@Query(() => User, { nullable: true })
 	async GetSelf(@Ctx() { req }: Context) {
 		if (!req.headers.cookie) return null
 
 		const data = decode(req.cookies['refresh-token']) as { userID: string }
+
 		if (!data) return null
 
 		const { userID } = data
 		const user = await User.getByID(userID)
 
-		if (!user) throw new Error('User doesnt exist')
+		if (!user) return null
 
 		return user
 	}
 
-	@Query(() => User, { nullable: true })
+	@Query(() => User)
 	async GetUserByID(@Arg('id') id: string) {
-		return await User.getByID(id)
+		const user = User.getByID(id)
+		if (!user) throw new Error('User does not exist')
+		return user
 	}
 
-	@Query(() => User, { nullable: true })
-	async GetUserByNameWithTotalPosts(@Ctx() { req }: Context, @Arg('name') name: string) {
-		req
-		return await User.getByName(name)
+	@Query(() => User)
+	async GetUserByName(@Arg('name') name: string) {
+		const user = User.getByName(name)
+		if (!user) throw new Error('User does not exist')
+		return user
 	}
 
 	@Mutation(() => User)
@@ -64,6 +91,6 @@ export class UserResolver {
 
 		const hashedPassword = await bcrypt.hash(password, 10)
 
-		return await User.persist({ name, password: hashedPassword })
+		return User.persist({ name, password: hashedPassword })
 	}
 }

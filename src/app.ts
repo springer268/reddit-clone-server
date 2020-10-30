@@ -6,7 +6,7 @@ import { createConnection } from 'typeorm'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { resolvers } from './entities/resolvers'
-import { Community, Post, User } from './entities'
+import { Community, Post, User, Comment, CommunityUser } from './entities'
 
 const initialize = async () => {
 	await createConnection({
@@ -18,7 +18,7 @@ const initialize = async () => {
 		database: 'reddit-clone',
 		synchronize: true,
 		logging: false,
-		entities: [Community, Post, User]
+		entities: [Community, Post, User, Comment, CommunityUser]
 	})
 
 	const app = express()
