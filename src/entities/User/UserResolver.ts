@@ -3,6 +3,7 @@ import { User, Post, Comment, Community, CommunityUser } from '..'
 import { Context } from '../../Context'
 import bcrypt from 'bcrypt'
 import { sign, decode } from 'jsonwebtoken'
+import { In } from 'typeorm'
 
 @Resolver(User)
 export class UserResolver {
@@ -31,12 +32,18 @@ export class UserResolver {
 	}
 
 	@FieldResolver(() => [Community])
-	async comunities(
+	async communities(
 		@Root() user: User,
 		@Arg('amount') amount: number,
 		@Arg('offset', { defaultValue: 0 }) offset: number
 	): Promise<Community[]> {
-		throw 'unimplemented'
+		const communityIDs = (await CommunityUser.find({ userID: user.id })).map(cu => cu.communityID)
+		return Community.find({
+			where: { id: In(communityIDs.length > 0 ? communityIDs : ['']) },
+			take: amount,
+			skip: offset,
+			order: { followerCount: 'DESC' }
+		})
 	}
 
 	@Query(() => User, { nullable: true })

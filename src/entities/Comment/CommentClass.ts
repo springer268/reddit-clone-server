@@ -1,4 +1,3 @@
-import { User, Post } from 'entities'
 import { Field, Int, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, DeepPartial, Entity, PrimaryColumn } from 'typeorm'
 import { generateUUID } from '../../util/generateUUID'
@@ -9,6 +8,10 @@ export class Comment extends BaseEntity {
 	@PrimaryColumn()
 	@Field(() => String)
 	id: string
+
+	@Column()
+	@Field(() => String)
+	path: string
 
 	@Column()
 	@Field(() => String)

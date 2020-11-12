@@ -84,6 +84,7 @@ export class CommentResolver {
 		@Arg('postID') postID: string,
 		@Arg('parentID', { nullable: true }) parentID: string
 	) {
+		const path = 2
 		return await Comment.persist({ content, authorID, postID, parentID })
 	}
 }
